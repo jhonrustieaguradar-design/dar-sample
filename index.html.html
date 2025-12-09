@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DAR Priority System - Local</title>
+<style>
+  body { margin:0; background:#fff; font-family:Arial,sans-serif; color:#006400; overflow:hidden; }
+  .logo-header { text-align:center; padding:20px 0; }
+  .logo-header img { height:100px; display:block; margin:0 auto 10px auto; }
+  .header { font-size:4vw; font-weight:bold; }
+  .contact { font-size:2vw; margin-top:5px; }
+  .container { display:flex; justify-content:space-evenly; padding:20px; width:100%; }
+  .panel { width:40%; text-align:center; padding:20px; border-radius:20px; background:#f0fff0; box-shadow:0 0 20px rgba(0,100,0,0.2) inset; }
+  .service { font-size:2.5vw; font-weight:bold; margin-bottom:10px; }
+  h2 { font-size:2vw; margin:5px 0; }
+  .number { font-size:12vw; font-weight:bold; margin:10px 0; }
+  .btn { padding:15px 25px; margin:5px; border:none; font-size:1.2vw; border-radius:12px; cursor:pointer; }
+  .next { background:#28a745; color:white; } 
+  .back { background:#ffc107; color:black; } 
+  .reset { background:#dc3545; color:white; } 
+  .func { background:#6c757d; color:white; }
+  .fullscreen-btn { background:#007bff; color:white; position:fixed; bottom:20px; right:20px; padding:20px 30px; font-size:1.2vw; }
+  .bottom-contact { text-align:center; position:fixed; bottom:10px; width:100%; font-size:1.8vw; }
+  @media(max-width:768px){
+    .number { font-size:20vw; }
+    .service { font-size:6vw; }
+  }
+</style>
+</head>
+<body>
+
+<div class="logo-header">
+  <img src="OIP.jpg" alt="DAR Logo">
+  <div class="header">Department of Agrarian Reform</div>
+  <div class="contact">General Contact: 0917-123-4567 | Legal Division: 0917-765-4321</div>
+</div>
+
+<div class="container">
+  <!-- DAR CLEARANCE -->
+  <div class="panel">
+    <div class="service">DAR CLEARANCE</div>
+    <h2>NOW SERVING</h2>
+    <div id="displayA" class="number">01</div>
+    <button class="btn back" onclick="changeNumber('A', -1)">Previous</button>
+    <button class="btn next" onclick="changeNumber('A', 1)">Next</button>
+    <button class="btn reset" onclick="resetNumber('A')">Reset</button>
+    <button class="btn func" onclick="functionButton('A')">Function</button>
+  </div>
+
+  <!-- RELEASING -->
+  <div class="panel">
+    <div class="service">RELEASING</div>
+    <h2>NOW SERVING</h2>
+    <div id="displayB" class="number">01</div>
+    <button class="btn back" onclick="changeNumber('B', -1)">Previous</button>
+    <button class="btn next" onclick="changeNumber('B', 1)">Next</button>
+    <button class="btn reset" onclick="resetNumber('B')">Reset</button>
+    <button class="btn func" onclick="functionButton('B')">Function</button>
+  </div>
+</div>
+
+<button class="btn fullscreen-btn" onclick="toggleFullScreen()">Full Screen</button>
+<div class="bottom-contact">General Contact: 0917-123-4567 | Legal Division: 0917-765-4321</div>
+
+<script>
+let counters = { A: 1, B: 1 };
+let lastSpoken = { A: null, B: null };
+
+function formatNumber(n){ return String(n).padStart(2,"0"); }
+
+function updateDisplay(panel){
+  const number = counters[panel];
+  document.getElementById("display"+panel).textContent = formatNumber(number);
+  if(lastSpoken[panel] !== number){
+    speakNumber(panel, formatNumber(number));
+    lastSpoken[panel] = number;
+  }
+}
+
+function changeNumber(panel, delta){
+  counters[panel] += delta;
+  if(counters[panel] < 1) counters[panel] = 1;
+  updateDisplay(panel);
+}
+
+function resetNumber(panel){
+  counters[panel] = 1;
+  updateDisplay(panel);
+}
+
+function functionButton(panel){
+  alert("Function button pressed on panel: "+panel);
+}
+
+function toggleFullScreen(){
+  if(!document.fullscreenElement) document.documentElement.requestFullscreen();
+  else document.exitFullscreen();
+}
+
+function speakNumber(panel, number){
+  let panelName = panel==='A'?'DAR Clearance':'Releasing';
+  const msg = new SpeechSynthesisUtterance("Department of Agrarian Reform. "+panelName+". Now serving number "+number);
+  const voices = speechSynthesis.getVoices();
+  if(!voices.length){ setTimeout(()=>speakNumber(panel, number),500); return; }
+  msg.voice = voices.find(v=>v.name.toLowerCase().includes("female"))||voices[0];
+  speechSynthesis.cancel();
+  speechSynthesis.speak(msg);
+}
+
+// Initialize display
+updateDisplay('A');
+updateDisplay('B');
+</script>
+
+</body>
+</html>
